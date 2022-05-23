@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <title>Flask-SocketIO Test</title>
+   <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+   <script type="text/javascript" charset="utf-8">
+     $(document).ready(function() {
+      namespace = '/test';
+      
+      //var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+      //socket.on('connect');
+
+      /*socket.on('my_response', function(msg) {
+        console.log(msg.data);
+        $('#log').append('Received #'+msg.count+': '+msg.data+'<br>').html(); });*/
+
+      /*$('form#emit').submit(function(event) {
+          socket.emit('my_event', {value: $('#emit_value').val()});
+          return false; });
+      $('#open').click(function(event) {
+          console.log($('#open').val());
+          socket.emit('/graph', {value: $('#open').val()});
+          /*if ($(this).val() == "start") {
+            $(this).val("stop");
+            $(this).text("Stop");
+          }
+          else {
+            $(this).val("start");
+            $(this).text("Start");
+          }
+          return false; }); 
+      /*$('form#disconnect').submit(function(event) {
+          socket.emit('disconnect_request');
+          return false; });*/         
+      });
+    </script>
+ </head>
+ <body>
+  <h1>Semestralne zadanie POIT 2022</h1>
+  <br/>
+  <a href='tabs'><button id="open" type="submit" value="open" style="height:75px;width:150px">Open</button></a>
+ </body>
+</html>

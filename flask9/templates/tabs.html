@@ -1,0 +1,185 @@
+<!doctype html>                                   
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>jQuery UI Tabs - Open on mouseover</title>
+    <!-- http://jqueryui.com/tabs/#mouseover -->
+    <link rel="stylesheet" href="static/libs/jquery-ui.min.css">
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+   <script src="static/libs/gauge.min.js"></script>
+   <script src="static/libs/plotly-latest.min.js"></script>
+    <script src="static/libs/jquery-3.2.1.min.js"></script>
+    <script src="static/libs/jquery-ui.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      $( function() {
+        $( "#tabs" ).tabs({
+          event: "mouseover"
+        });
+      } );
+      
+      
+      
+      $(document).ready(function() {
+        var x = new Array();
+        var y = new Array();
+        var trace;
+        var layout = {
+          title: 'Data',
+          xaxis: {
+              title: 'cas',
+              //range: [0,120]
+          },
+          yaxis: {
+              title: 'reg velicina',
+              //range: [0,5]
+          }
+        };
+        
+            
+        var gauge = new RadialGauge({
+          renderTo: 'canvasID',
+          width: 300,
+          height: 300,
+          units: "Km/h",
+          minValue: 0,
+          maxValue: 5,
+          majorTicks: [
+              "0",
+              "0.1",
+              "0.2",
+              "0.3",
+              "0.4",
+              "0.5",
+              "0.6",
+              "0.7",
+              "0.8",
+              "0.9",
+              "1.0",
+              "1.5",
+              "2.0",
+              "2.5",
+              "3.0",
+              "3.5",
+              "4.0",
+              "4.5",
+              "5.0",
+          ],
+          minorTicks: 2,
+          strokeTicks: true,
+          highlights: [
+              {
+                  "from": 0.5,
+                  "to": 5,
+                  "color": "rgba(200, 50, 50, .75)"
+              }
+          ],
+          colorPlate: "#fff",
+          borderShadowWidth: 0,
+          borders: false,
+          needleType: "arrow",
+          needleWidth: 2,
+          needleCircleSize: 7,
+          needleCircleOuter: true,
+          needleCircleInner: false,
+          animationDuration: 1500,
+          animationRule: "linear"
+      });
+      gauge.draw();
+      
+      
+      namespace = '/test';
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+      socket.on('connect', function() {
+        socket.emit('start_process', {data: 'I\'m connected!', value: 'smth'}); });
+
+      socket.on('my_response', function(msg) {
+        console.log(msg.data);
+        $('#log').append('Received #'+msg.count+': '+msg.data.w+'<br>').html(); 
+        if(typeof msg.data.x  !== "undefined" && typeof msg.data.w  !== "undefined" && $('#emit_value').val() != "stop"){
+          if(!y.includes(msg.data.w)){
+          x.push(msg.data.x);
+          y.push(msg.data.w);
+          gauge.value = msg.data.w;
+        }
+      }
+        
+        trace = [{
+            x: x,
+            y: y,
+            name: 'graph_y',
+        }];
+        
+        console.log(trace);
+        var traces = new Array();
+        traces.push(trace);
+        Plotly.newPlot($('#plotdiv')[0], trace, layout); 
+        //addTraces                              
+        });
+    
+    
+    
+    $('form#emit').submit(function(event) {
+          socket.emit('my_event', {value: $('#emit_value').val()});
+          return false; });
+      $('#buttonVal').click(function(event) {
+          console.log($('#buttonVal').val());
+          socket.emit('start_process', {value: $('#buttonVal').val()});
+          if ($(this).val() == "start") {
+            $(this).val("stop");
+            $(this).text("Stop");
+          }
+          else {
+            $(this).val("start");
+            $(this).text("Start");
+          }
+          return false; });
+          
+      $('form#disconnect').submit(function(event) {
+          socket.emit('disconnect_request');
+          return false; });         
+      });
+    </script>
+  </head>
+  <body>
+   
+    <div id="tabs">
+      <ul>
+        <li><a href="#tabs-1">Numerický výpis hodnôt s riadiacimi tlačidlami</a></li>
+        <li><a href="#tabs-2">Graf</a></li>
+        <li><a href="#tabs-3">Analógový cíferník</a></li>
+      </ul>
+      <div id="tabs-1">
+        <button id="buttonVal" type="submit" value="start" style="height:75px;width:150px">Start</button>
+        <h1>Flask-SocketIO Test</h1>
+        <h2>Send:</h2>
+        <form id="emit" method="POST" action='#'>
+          <label>Zadaj zelanu hodnotu v rozsahu 0 - 5</label>
+          <input type="text" name="emit_value" id="emit_value" value="2" placeholder="0 - 5">
+          <input type="submit" value="Send">
+        </form>
+        
+        <form id="disconnect" method="POST" action="#">
+          <input type="submit" value="Close">
+        </form> 
+      </div>
+      <div id="tabs-2">
+        <form id="disconnect" method="POST" action="#">
+          <input type="submit" value="Close">
+      </form> 
+        <div id="plotdiv" style="width:600px;height:250px;"></div>
+      </div>
+      <div id="tabs-3">
+        <form id="disconnect" method="POST" action="#">
+          <input type="submit" value="Close">
+      </form> 
+        <canvas id="canvasID"></canvas>
+      </div>
+      
+      <h2>Receive:</h2>
+      <div id="log"></div>
+    </div>
+ 
+  </body>
+</html>
